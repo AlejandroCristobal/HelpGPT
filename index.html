@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelpGPT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#5D5CDE',
+            'primary-dark': '#4A49B5',
+            'gray-dark': '#181818',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .message-appear {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .typing-indicator span {
+      animation: blink 1.4s infinite both;
+    }
+    
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes blink {
+      0% { opacity: 0.1; }
+      20% { opacity: 1; }
+      100% { opacity: 0.1; }
+    }
+    
+    .dark .message-user {
+      background-color: #2A2A2A;
+    }
+    
+    .dark .message-ai {
+      background-color: #232323;
+    }
+  </style>
+</head>
+<body class="transition-colors duration-300">
+  <div class="min-h-screen flex flex-col bg-white dark:bg-gray-dark text-gray-900 dark:text-gray-100">
+    <!-- Header -->
+    <header class="bg-primary dark:bg-primary-dark text-white p-4 shadow-md">
+      <h1 class="text-xl font-bold text-center">HelpGPT</h1>
+    </header>
+    
+    <!-- Chat container -->
+    <div class="flex-1 flex flex-col p-4 overflow-hidden">
+      <div id="chat-messages" class="flex-1 overflow-y-auto mb-4 space-y-4">
+        <!-- Welcome message -->
+        <div class="message message-ai bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-[80%] message-appear">
+          <div class="font-medium text-primary dark:text-primary mb-1">HelpGPT</div>
+          <p>¡Hola! Soy HelpGPT, tu asistente inteligente. ¿Cómo puedo ayudarte hoy?</p>
+        </div>
+      </div>
+      
+      <!-- GitHub banner -->
+      <div class="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-lg mb-4 text-sm">
+        <p class="font-medium">⚠️ Versión Demo - GitHub Pages</p>
+        <p>Esta es una versión de demostración. Para una implementación completa con IA real, necesitarás configurar un backend.</p>
+        <div class="mt-2">
+          <a href="https://github.com/tu-usuario/helpgpt" target="_blank" class="inline-flex items-center text-primary dark:text-primary-dark hover:underline">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"></path>
+            </svg>
+            Ver en GitHub
+          </a>
+        </div>
+      </div>
+      
+      <!-- Input area -->
+      <div class="border-t border-gray-300 dark:border-gray-700 pt-4">
+        <form id="chat-form" class="flex items-center gap-2">
+          <textarea 
+            id="user-input" 
+            class="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-base"
+            placeholder="Escribe un mensaje..." 
+            rows="1"
+          ></textarea>
+          <button 
+            type="submit" 
+            class="bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors duration-300"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check for dark mode preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+      if (event.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    });
+    
+    // DOM elements
+    const chatForm = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const chatMessages = document.getElementById('chat-messages');
+    
+    // Auto-resize text area
+    userInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+      // Reset to 1 row if empty
+      if (this.value === '') {
+        this.style.height = 'auto';
+        this.rows = 1;
+      }
+    });
+    
+    // Function to add a message to the chat
+    function addMessage(content, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'message-user' : 'message-ai'} ${isUser ? 'ml-auto' : ''} ${isUser ? 'bg-primary' : 'bg-gray-100'} dark:${isUser ? 'bg-primary-dark' : 'bg-gray-800'} p-3 rounded-lg max-w-[80%] message-appear`;
+      
+      // Add sender label
+      const senderLabel = document.createElement('div');
+      senderLabel.className = `font-medium ${isUser ? 'text-white' : 'text-primary dark:text-primary'} mb-1`;
+      senderLabel.textContent = isUser ? 'Tú' : 'HelpGPT';
+      messageDiv.appendChild(senderLabel);
+      
+      // Add message content
+      const messageContent = document.createElement('p');
+      messageContent.textContent = content;
+      messageDiv.appendChild(messageContent);
+      
+      chatMessages.appendChild(messageDiv);
+      
+      // Scroll to bottom
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+      return messageDiv;
+    }
+    
+    // Function to add a typing indicator
+    function addTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing-indicator';
+      typingDiv.className = 'message message-ai bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-[80%] message-appear';
+      
+      const senderLabel = document.createElement('div');
+      senderLabel.className = 'font-medium text-primary dark:text-primary mb-1';
+      senderLabel.textContent = 'HelpGPT';
+      typingDiv.appendChild(senderLabel);
+      
+      const typingIndicator = document.createElement('div');
+      typingIndicator.className = 'typing-indicator';
+      typingIndicator.innerHTML = 'Pensando<span>.</span><span>.</span><span>.</span>';
+      typingDiv.appendChild(typingIndicator);
+      
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+      return typingDiv;
+    }
+    
+    // Function to remove typing indicator
+    function removeTypingIndicator() {
+      const typingIndicator = document.getElementById('typing-indicator');
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+    
+    // Demo responses (para GitHub Pages)
+    const demoResponses = [
+      "¡Claro! Puedo ayudarte con eso. ¿Necesitas más información al respecto?",
+      "Esa es una pregunta interesante. Basado en mi conocimiento, te puedo decir que hay varias perspectivas sobre ese tema.",
+      "Entiendo lo que estás buscando. Te recomendaría considerar las siguientes opciones...",
+      "Gracias por tu pregunta. Para responder adecuadamente, necesitaría un poco más de contexto. ¿Podrías proporcionar más detalles?",
+      "¡Excelente pregunta! Eso es algo sobre lo que he investigado bastante. Permíteme compartir algunos puntos clave.",
+      "Veo que estás interesado en este tema. Es un área fascinante con muchos desarrollos recientes.",
+      "Para resolver tu consulta, te sugiero seguir estos pasos...",
+      "Esta es una pregunta común. La respuesta corta es que depende de varios factores, incluyendo...",
+      "Entiendo tu inquietud. Déjame ayudarte a resolver este problema paso a paso.",
+      "Basado en la información que has proporcionado, puedo sugerirte algunas soluciones potenciales."
+    ];
+    
+    // Simula una respuesta con efecto de streaming
+    function simulateStreamingResponse(message) {
+      return new Promise((resolve) => {
+        // Elige una respuesta aleatoria
+        const responseIndex = Math.floor(Math.random() * demoResponses.length);
+        let response = demoResponses[responseIndex];
+        
+        // Personaliza un poco la respuesta basada en el mensaje del usuario
+        if (message.toLowerCase().includes("hola") || message.toLowerCase().includes("saludos")) {
+          response = "¡Hola! Es un placer saludarte. ¿En qué puedo ayudarte hoy?";
+        } else if (message.toLowerCase().includes("gracias")) {
+          response = "¡De nada! Estoy aquí para ayudarte. ¿Hay algo más en lo que pueda asistirte?";
+        } else if (message.includes("?")) {
+          // Si es una pregunta, añade un preámbulo
+          response = "Considerando tu pregunta, " + response;
+        }
+        
+        // Crea un elemento para la respuesta
+        const aiMessageElement = addMessage("");
+        aiMessageElement.id = 'current-ai-response';
+        
+        // Simula el efecto de streaming letra por letra
+        let currentIndex = 0;
+        const messageContent = aiMessageElement.querySelector('p');
+        
+        const interval = setInterval(() => {
+          if (currentIndex < response.length) {
+            messageContent.textContent += response[currentIndex];
+            currentIndex++;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          } else {
+            clearInterval(interval);
+            aiMessageElement.removeAttribute('id');
+            resolve();
+          }
+        }, 20); // Velocidad de "escritura"
+      });
+    }
+    
+    // Handle form submission
+    chatForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const userMessage = userInput.value.trim();
+      
+      if (!userMessage) return;
+      
+      // Add user message to chat
+      addMessage(userMessage, true);
+      
+      // Clear input
+      userInput.value = '';
+      userInput.style.height = 'auto';
+      userInput.rows = 1;
+      
+      // Add typing indicator
+      addTypingIndicator();
+      
+      // Simula un pequeño retraso antes de empezar a responder
+      setTimeout(async () => {
+        removeTypingIndicator();
+        await simulateStreamingResponse(userMessage);
+      }, 1000);
+    });
+    
+    // COMENTADO: Código para integrar con un backend real
+    /*
+    async function sendMessageToAPI(message) {
+      try {
+        const response = await fetch('https://tu-backend.com/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error en la respuesta del servidor');
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    }
+    */
+  </script>
+</body>
+</html>
